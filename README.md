@@ -1,4 +1,4 @@
-# Hubitat-Auto-Shades
+# Auto Shades app for Hubitat
 An app for Hubitat that can automatically control smartblinds and shades, by integrating with a light sensor.
 
 Auto Shades will automatically close your smartblinds if the light sensor gets over a threshold value.  It will re-open them when it's no longer so bright.
