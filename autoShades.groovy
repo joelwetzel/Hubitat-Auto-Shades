@@ -1,5 +1,5 @@
 /**
- *  Auto Shades
+ *  Auto Shades v1.0
  *
  *  Copyright 2019 Joel Wetzel
  *
