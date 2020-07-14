@@ -1,5 +1,5 @@
 /**
- *  Auto Shades Instance
+ *  Auto Shades Instance v1.0
  *
  *  Copyright 2019 Joel Wetzel
  *
