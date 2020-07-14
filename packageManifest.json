@@ -5,7 +5,7 @@
 	"version": "1.0",
 	"dateReleased": "2020-07-14",
 	"licenseFile": "https://raw.githubusercontent.com/joelwetzel/Hubitat-Auto-Shades/master/LICENSE",
-	"releaseNotes": "https://raw.githubusercontent.com/joelwetzel/Hubitat-Auto-Shades/master/README.md",
+	"releaseNotes": "Initial release through Hubitat Package Manager.",
 	"apps" : [
 		{
 			"id" : "147c2e36-db99-426b-a238-7ea614459d26",
