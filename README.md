@@ -7,4 +7,6 @@ It also has configurable timeouts, so it won't override any manual changes you m
 
 ## Installation
 
-There are two Hubitat apps to install on your hub.  (A parent and a child instance app.)  You need them both.
+The best way to install this code is by using [Hubitat Package Manager](https://community.hubitat.com/t/beta-hubitat-package-manager).
+
+But if you install manually, there are two Hubitat apps to install on your hub.  (A parent and a child instance app.)  You need them both.
