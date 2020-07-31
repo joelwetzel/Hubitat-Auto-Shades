@@ -1,5 +1,5 @@
 /**
- *  Auto Shades Instance v1.0
+ *  Auto Shades Instance v1.01
  *
  *  Copyright 2019 Joel Wetzel
  *
@@ -160,7 +160,7 @@ def illuminanceHandler(e) {
     def disableAutoClose = false
     
     use (groovy.time.TimeCategory) {
-        def minutesSinceLastManualClose = (new Date() - toDateTime(state.lastManualClose)).minutes
+        def minutesSinceLastManualClose = (new Date() - toDateTime(state.lastManualClose)).minutes + (new Date() - toDateTime(state.lastManualClose)).hours*60 + (new Date() - toDateTime(state.lastManualClose)).days*60*24
         def minutesSinceLastAutoClose = (new Date() - toDateTime(state.lastAutoClose)).minutes
 
         log "minutesSinceLastManualClose: ${minutesSinceLastManualClose}"
