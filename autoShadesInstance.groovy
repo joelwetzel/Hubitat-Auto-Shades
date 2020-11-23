@@ -1,5 +1,5 @@
 /**
- *  Auto Shades Instance v1.02
+ *  Auto Shades Instance v1.03
  *
  *  Copyright 2019 Joel Wetzel
  *
@@ -59,14 +59,14 @@ preferences {
                 name:				"delayAfterManualClose",
 	            type:				"number",
 	            title:				"After manually adjusting the blinds, wait this many minutes before allowing any auto opens/closes.  (So that your manual adjustments will 'stick'.)",
-	            defaultValue:		30,
+	            defaultValue:		120,
 	            required:			true
             )
             input (
                 name:				"delayAfterAutoClose",
 	            type:				"number",
 	            title:				"After auto-closing the blinds, wait this many minutes before allowing an auto-open.  (This is to prevent excess activity.)",
-	            defaultValue:		6,
+	            defaultValue:		15,
 	            required:			true
             )
             input (
@@ -119,14 +119,15 @@ def initialize() {
     subscribe(lightSensor, "illuminance", illuminanceHandler)
 
 	// Generate a label for this child app
-	app.updateLabel("Automated ${wrappedShade.displayName}")
+	app.updateLabel("Auto Shades - ${wrappedShade.displayName}")
     
-    if (!state.lastAutoClose) {
-        state.lastAutoClose = new Date()
+    if (!state.lastAutoShade) {
+        state.lastAutoShade = new Date()
     }
     
-    if (!state.lastManualClose) {
-        state.lastManualClose = new Date()
+    use (groovy.time.TimeCategory) {
+        // Make it 24 hours ago so that Autoshades can start responding right away.
+        state.lastManualClose = new Date()-24.hours
     }
 }
 
@@ -135,12 +136,10 @@ def windowShadeHandler(e) {
     log "autoShades:windowShadeHandler(${e.value})"
     
     use (groovy.time.TimeCategory) {
-        def secondsSinceLastAutoClose = (new Date() - toDateTime(state.lastAutoClose)).seconds
+        def secondsSinceLastAutoShade = (new Date() - toDateTime(state.lastAutoShade)).seconds
         
-        //log "secondsSinceLastAutoClose: ${secondsSinceLastAutoClose}"
-        
-        if (secondsSinceLastAutoClose > 6) {
-            // Don't update lastManualClose if we are just getting the event from an auto-close.
+        if (secondsSinceLastAutoShade > 6) {
+            // Don't update lastManualClose if we are just getting the event from an auto-close/open.
             log "Detected a manual event."
             state.lastManualClose = new Date()
         }
@@ -154,45 +153,47 @@ def illuminanceHandler(e) {
     def illuminanceMeasurement = Double.parseDouble(e.value)
     def currentShadeValue = wrappedShade.currentWindowShade
     
-    log "illuminanceMeasurement: ${illuminanceMeasurement}"
-    log "currentShadeValue: ${currentShadeValue}"
+    def disableAutoShades = false
     
-    def disableAutoClose = false
+    def minutesSinceLastManualClose = 0
+    def minutesSinceLastAutoShade = 0
     
     use (groovy.time.TimeCategory) {
-        def minutesSinceLastManualClose = (new Date() - toDateTime(state.lastManualClose)).minutes + (new Date() - toDateTime(state.lastManualClose)).hours*60 + (new Date() - toDateTime(state.lastManualClose)).days*60*24
-        def minutesSinceLastAutoClose = (new Date() - toDateTime(state.lastAutoClose)).minutes
+        minutesSinceLastManualClose = (new Date() - toDateTime(state.lastManualClose)).minutes + (new Date() - toDateTime(state.lastManualClose)).hours*60 + (new Date() - toDateTime(state.lastManualClose)).days*60*24
+        minutesSinceLastAutoShade = (new Date() - toDateTime(state.lastAutoShade)).minutes
 
-        log "minutesSinceLastManualClose: ${minutesSinceLastManualClose}"
-        log "minutesSinceLastAutoClose: ${minutesSinceLastAutoClose}"
-        
         if (minutesSinceLastManualClose <= delayAfterManualClose) {
             // Manual open/close disables auto-close for a default of a half hour.
-            disableAutoClose = true
+            log "Skipping AutoShade because minutesSinceLastManualClose <= delayAfterManualClose (${minutesSinceLastManualClose} <= ${delayAfterManualClose})"
+            disableAutoShades = true
         }
-        
-        if (currentShadeValue == "closed" && minutesSinceLastAutoClose <= delayAfterAutoClose) {
+        else if (currentShadeValue == "closed" && minutesSinceLastAutoShade <= delayAfterAutoClose) {
             // Delay (default 6 minutes) after auto-close, before auto-opening.
-            disableAutoClose = true
+            log "Skipping AutoShade because currentShadeValue == close && minutesSinceLastAutoShade <= delayAfterAutoClose (${minutesSinceLastAutoShade} <= ${delayAfterAutoClose})"
+            disableAutoShades = true
         }
-        
-        if (currentShadeValue == "open" && minutesSinceLastAutoClose <= delayAfterAutoOpen) {
+        else if (currentShadeValue == "open" && minutesSinceLastAutoShade <= delayAfterAutoOpen) {
             // Delay (default 3 minutes) after auto-open, before auto-closing.
-            disableAutoClose = true
+            log "Skipping Autoshade because currentShadeValue == open && minutesSinceLastAutoShade <= delayAfterAutoOpen (${minutesSinceLastAutoShade} <= ${delayAfterAutoOpen})"
+            disableAutoShades = true
         }
     }
     
-    log "disableAutoClose: ${disableAutoClose}"
+    //log "disableAutoShades: ${disableAutoShades}"
     
-    if (!disableAutoClose) {
+    if (!disableAutoShades) {
+        log "currentShadeValue: ${currentShadeValue}"
+        log "minutesSinceLastManualClose: ${minutesSinceLastManualClose}"
+        log "minutesSinceLastAutoShade: ${minutesSinceLastAutoShade}"
+
         if (illuminanceMeasurement > illuminanceThreshold && currentShadeValue != "closed") {
-            log "auto-closing..."
-            state.lastAutoClose = new Date()
+            log "Auto-closing..."
+            state.lastAutoShade = new Date()
             wrappedShade.close()
         }
         else if (illuminanceMeasurement <= illuminanceThreshold && currentShadeValue != "open") {
-            log "auto-opening..."
-            state.lastAutoClose = new Date()
+            log "Auto-opening..."
+            state.lastAutoShade = new Date()
             wrappedShade.open()
         }
     }
@@ -211,6 +212,7 @@ def log(msg) {
 		log.debug(msg)	
 	}
 }
+
 
 
 
