@@ -21,8 +21,20 @@ class TimeKeeper {
         internalDate = newDate
     }
 
+    def advanceSeconds(int seconds) {
+        internalDate = groovy.time.TimeCategory.plus(internalDate, new groovy.time.TimeDuration(0, 0, 0, seconds, 0))
+    }
+
     def advanceMinutes(int minutes) {
         internalDate = groovy.time.TimeCategory.plus(internalDate, new groovy.time.TimeDuration(0, 0, minutes, 0, 0))
+    }
+
+    def advanceHours(int hours) {
+        internalDate = groovy.time.TimeCategory.plus(internalDate, new groovy.time.TimeDuration(0, hours, 0, 0, 0))
+    }
+
+    def advanceDays(int days) {
+        internalDate = groovy.time.TimeCategory.plus(internalDate, new groovy.time.TimeDuration(days, 0, 0, 0, 0))
     }
 
     def now() {

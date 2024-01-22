@@ -1,18 +1,5 @@
 package joelwetzel.auto_shades.tests
 
-import me.biocomp.hubitat_ci.util.device_fixtures.WindowShadeFixtureFactory
-import me.biocomp.hubitat_ci.util.device_fixtures.LightSensorFixtureFactory
-import me.biocomp.hubitat_ci.util.AppExecutorWithEventForwarding
-
-import me.biocomp.hubitat_ci.api.app_api.AppExecutor
-import me.biocomp.hubitat_ci.api.common_api.Log
-import me.biocomp.hubitat_ci.app.HubitatAppSandbox
-import me.biocomp.hubitat_ci.api.common_api.DeviceWrapper
-import me.biocomp.hubitat_ci.api.common_api.InstalledAppWrapper
-import me.biocomp.hubitat_ci.capabilities.GeneratedCapability
-import me.biocomp.hubitat_ci.util.NullableOptional
-import me.biocomp.hubitat_ci.validation.Flags
-
 import groovy.time.*
 
 import joelwetzel.auto_shades.utils.TimeKeeper
@@ -48,6 +35,21 @@ class TimeKeeperTests extends Specification {
         then:
             date != currentDate
             date.toString() == "Sun Aug 31 08:23:45 CDT 2014"
+
+        cleanup:
+            timekeeper.uninstall()
+    }
+
+    void "By default, TimeKeeper will start at current time"() {
+        given:
+            def timekeeper = new TimeKeeper()
+            timekeeper.install()
+
+        when:
+            def date = new Date()
+
+        then:
+            date.toString() == currentDate.toString()
 
         cleanup:
             timekeeper.uninstall()
@@ -95,6 +97,78 @@ class TimeKeeperTests extends Specification {
         then:
             date2 != currentDate
             date2.toString() == "Sun Aug 31 08:28:45 CDT 2014"
+
+        cleanup:
+            timekeeper.uninstall()
+    }
+
+    void "Can advance the seconds of the TimeKeeper"() {
+        given:
+            def timekeeper = new TimeKeeper(Date.parse("yyyy-MM-dd hh:mm:ss", "2014-08-31 8:23:45"))
+            timekeeper.install()
+
+        when:
+            def date = new Date()
+
+        then:
+            date != currentDate
+            date.toString() == "Sun Aug 31 08:23:45 CDT 2014"
+
+        when:
+            timekeeper.advanceSeconds(5)
+            def date2 = new Date()
+
+        then:
+            date2 != currentDate
+            date2.toString() == "Sun Aug 31 08:23:50 CDT 2014"
+
+        cleanup:
+            timekeeper.uninstall()
+    }
+
+    void "Can advance the hours of the TimeKeeper"() {
+        given:
+            def timekeeper = new TimeKeeper(Date.parse("yyyy-MM-dd hh:mm:ss", "2014-08-31 8:23:45"))
+            timekeeper.install()
+
+        when:
+            def date = new Date()
+
+        then:
+            date != currentDate
+            date.toString() == "Sun Aug 31 08:23:45 CDT 2014"
+
+        when:
+            timekeeper.advanceHours(5)
+            def date2 = new Date()
+
+        then:
+            date2 != currentDate
+            date2.toString() == "Sun Aug 31 13:23:45 CDT 2014"
+
+        cleanup:
+            timekeeper.uninstall()
+    }
+
+    void "Can advance the days of the TimeKeeper"() {
+        given:
+            def timekeeper = new TimeKeeper(Date.parse("yyyy-MM-dd hh:mm:ss", "2014-08-31 8:23:45"))
+            timekeeper.install()
+
+        when:
+            def date = new Date()
+
+        then:
+            date != currentDate
+            date.toString() == "Sun Aug 31 08:23:45 CDT 2014"
+
+        when:
+            timekeeper.advanceDays(5)
+            def date2 = new Date()
+
+        then:
+            date2 != currentDate
+            date2.toString() == "Fri Sep 05 08:23:45 CDT 2014"
 
         cleanup:
             timekeeper.uninstall()
