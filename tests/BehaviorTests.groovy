@@ -11,11 +11,11 @@ import me.biocomp.hubitat_ci.api.common_api.DeviceWrapper
 import me.biocomp.hubitat_ci.api.common_api.InstalledAppWrapper
 import me.biocomp.hubitat_ci.capabilities.GeneratedCapability
 import me.biocomp.hubitat_ci.util.NullableOptional
+import me.biocomp.hubitat_ci.util.TimeKeeper
 import me.biocomp.hubitat_ci.validation.Flags
 
 import groovy.time.*
 
-import joelwetzel.auto_shades.utils.TimeKeeper
 
 import spock.lang.Specification
 
