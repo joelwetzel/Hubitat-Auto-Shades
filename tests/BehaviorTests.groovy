@@ -2,7 +2,7 @@ package joelwetzel.auto_shades.tests
 
 import me.biocomp.hubitat_ci.util.device_fixtures.WindowShadeFixtureFactory
 import me.biocomp.hubitat_ci.util.device_fixtures.LightSensorFixtureFactory
-import me.biocomp.hubitat_ci.util.AppExecutorWithEventForwarding
+import me.biocomp.hubitat_ci.util.IntegrationAppExecutor
 
 import me.biocomp.hubitat_ci.api.app_api.AppExecutor
 import me.biocomp.hubitat_ci.api.common_api.Log
@@ -33,7 +33,7 @@ class BehaviorTests extends Specification {
 
     def appState = [lastAutoShade: null, lastManualClose: null]
 
-    def appExecutor = Spy(AppExecutorWithEventForwarding) {
+    def appExecutor = Spy(IntegrationAppExecutor) {
         _*getLog() >> log
         _*getApp() >> installedApp
         _*getState() >> appState
