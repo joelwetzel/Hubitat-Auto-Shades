@@ -23,8 +23,6 @@ import spock.lang.Specification
 * Behavior tests for autoShadesInstance.groovy
 */
 class BehaviorTests extends Specification {
-    def timekeeper = new TimeKeeper()
-
     private HubitatAppSandbox sandbox = new HubitatAppSandbox(new File('autoShadesInstance.groovy'))
 
     def log = Mock(Log)
@@ -46,13 +44,13 @@ class BehaviorTests extends Specification {
         userSettingValues: [wrappedShade: shadeFixture, lightSensor: lightSensorFixture, illuminanceThreshold: 400, delayAfterManualClose: 120, delayAfterAutoClose: 15, delayAfterAutoOpen: 3, enableDebugLogging: true])
 
     def setup() {
-        timekeeper.install()
+        TimeKeeper.removeAllListeners()
         appExecutor.setSubscribingScript(appScript)
         appScript.installed()
     }
 
     def cleanup() {
-        timekeeper.uninstall()
+        TimeKeeper.removeAllListeners()
     }
 
     void "Shade should auto-open when it gets dark"() {
@@ -77,7 +75,7 @@ class BehaviorTests extends Specification {
         lightSensorFixture.setIlluminance(200)
 
         when: "Two minutes pass"
-        timekeeper.advanceMinutes(2)
+        TimeKeeper.advanceMinutes(2)
 
         and: "The cloud passes and the illuminance rises above the threshold"
         lightSensorFixture.setIlluminance(600)
@@ -96,7 +94,7 @@ class BehaviorTests extends Specification {
         lightSensorFixture.setIlluminance(200)
 
         when: "Twenty minutes pass"
-        timekeeper.advanceMinutes(20)
+        TimeKeeper.advanceMinutes(20)
 
         and: "The cloud passes and the illuminance rises above the threshold"
         lightSensorFixture.setIlluminance(600)
@@ -128,7 +126,7 @@ class BehaviorTests extends Specification {
         lightSensorFixture.setIlluminance(600)
 
         when: "Two minutes pass"
-        timekeeper.advanceMinutes(2)
+        TimeKeeper.advanceMinutes(2)
 
         and: "The sun goes behind a cloud and the illuminance drops below the threshold"
         lightSensorFixture.setIlluminance(200)
@@ -147,7 +145,7 @@ class BehaviorTests extends Specification {
         lightSensorFixture.setIlluminance(600)
 
         when: "Twenty minutes pass"
-        timekeeper.advanceMinutes(20)
+        TimeKeeper.advanceMinutes(20)
 
         and: "The sun goes behind a cloud and the illuminance drops below the threshold"
         lightSensorFixture.setIlluminance(200)
@@ -163,11 +161,11 @@ class BehaviorTests extends Specification {
         lightSensorFixture.initialize(appExecutor, [illuminance: 600])
 
         when: "A few minutes pass and the user manually opens the shade"
-        timekeeper.advanceMinutes(5)
+        TimeKeeper.advanceMinutes(5)
         shadeFixture.open()
 
         and: "Twenty minutes pass and it's still bright outside"
-        timekeeper.advanceMinutes(20)
+        TimeKeeper.advanceMinutes(20)
         lightSensorFixture.setIlluminance(600)
 
         then: "The shade should not auto-close"
@@ -181,11 +179,11 @@ class BehaviorTests extends Specification {
         lightSensorFixture.initialize(appExecutor, [illuminance: 600])
 
         when: "A few minutes pass and the user manually opens the shade"
-        timekeeper.advanceMinutes(5)
+        TimeKeeper.advanceMinutes(5)
         shadeFixture.open()
 
         and: "Two hours pass and it's still bright outside"
-        timekeeper.advanceMinutes(121)
+        TimeKeeper.advanceMinutes(121)
         lightSensorFixture.setIlluminance(600)
 
         then: "The shade should auto-close"
@@ -199,11 +197,11 @@ class BehaviorTests extends Specification {
         lightSensorFixture.initialize(appExecutor, [illuminance: 200])
 
         when: "A few minutes pass and the user manually closes the shade"
-        timekeeper.advanceMinutes(5)
+        TimeKeeper.advanceMinutes(5)
         shadeFixture.close()
 
         and: "Twenty minutes pass and it's still dark outside"
-        timekeeper.advanceMinutes(20)
+        TimeKeeper.advanceMinutes(20)
         lightSensorFixture.setIlluminance(200)
 
         then: "The shade should not auto-open"
@@ -217,11 +215,11 @@ class BehaviorTests extends Specification {
         lightSensorFixture.initialize(appExecutor, [illuminance: 200])
 
         when: "A few minutes pass and the user manually closes the shade"
-        timekeeper.advanceMinutes(5)
+        TimeKeeper.advanceMinutes(5)
         shadeFixture.close()
 
         and: "Two hours pass and it's still dark outside"
-        timekeeper.advanceMinutes(121)
+        TimeKeeper.advanceMinutes(121)
         lightSensorFixture.setIlluminance(200)
 
         then: "The shade should auto-open"
