@@ -2,52 +2,22 @@ package joelwetzel.auto_shades.tests
 
 import me.biocomp.hubitat_ci.util.device_fixtures.WindowShadeFixtureFactory
 import me.biocomp.hubitat_ci.util.device_fixtures.LightSensorFixtureFactory
-import me.biocomp.hubitat_ci.util.IntegrationAppExecutor
-
-import me.biocomp.hubitat_ci.api.app_api.AppExecutor
-import me.biocomp.hubitat_ci.api.common_api.Log
-import me.biocomp.hubitat_ci.app.HubitatAppSandbox
-import me.biocomp.hubitat_ci.api.common_api.DeviceWrapper
-import me.biocomp.hubitat_ci.api.common_api.InstalledAppWrapper
-import me.biocomp.hubitat_ci.capabilities.GeneratedCapability
-import me.biocomp.hubitat_ci.util.NullableOptional
-import me.biocomp.hubitat_ci.validation.Flags
+import me.biocomp.hubitat_ci.util.integration.IntegrationAppSpecification
+import me.biocomp.hubitat_ci.util.integration.TimeKeeper
 
 import spock.lang.Specification
 
 /**
 * Basic tests for autoShadesInstance.groovy
 */
-class BasicTests extends Specification {
-    private HubitatAppSandbox sandbox = new HubitatAppSandbox(new File('autoShadesInstance.groovy'))
-
-    def log = Mock(Log)
-
-    InstalledAppWrapper app = Mock{
-        _ * getName() >> "MyAppName"
-    }
-
-    def appState = [lastAutoShade: null]
-
-    def appExecutor = Spy(IntegrationAppExecutor) {
-        _*getLog() >> log
-        _*getApp() >> app
-        _*getState() >> appState
-    }
-
+class BasicTests extends IntegrationAppSpecification {
     def shadeFixture = WindowShadeFixtureFactory.create('ws')
     def lightSensorFixture = LightSensorFixtureFactory.create('ls')
 
-    def appScript = sandbox.run(api: appExecutor,
-        userSettingValues: [wrappedShade: shadeFixture, lightSensor: lightSensorFixture, illuminanceThreshold: 400, delayAfterManualClose: 120, delayAfterAutoClose: 15, delayAfterAutoOpen: 3, enableDebugLogging: true])
-
+    @Override
     def setup() {
-        appExecutor.setSubscribingScript(appScript)
-    }
-
-    void "Basic validation of app script"() {
-        expect:
-        sandbox.run()
+        super.initializeEnvironment(appScriptFilename: "autoShadesInstance.groovy",
+                                    userSettingValues: [wrappedShade: shadeFixture, lightSensor: lightSensorFixture, illuminanceThreshold: 400, delayAfterManualClose: 120, delayAfterAutoClose: 15, delayAfterAutoOpen: 3, enableDebugLogging: true])
     }
 
     void "installed() logs the settings"() {

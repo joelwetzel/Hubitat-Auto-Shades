@@ -2,55 +2,23 @@ package joelwetzel.auto_shades.tests
 
 import me.biocomp.hubitat_ci.util.device_fixtures.WindowShadeFixtureFactory
 import me.biocomp.hubitat_ci.util.device_fixtures.LightSensorFixtureFactory
-import me.biocomp.hubitat_ci.util.IntegrationAppExecutor
-
-import me.biocomp.hubitat_ci.api.app_api.AppExecutor
-import me.biocomp.hubitat_ci.api.common_api.Log
-import me.biocomp.hubitat_ci.app.HubitatAppSandbox
-import me.biocomp.hubitat_ci.api.common_api.DeviceWrapper
-import me.biocomp.hubitat_ci.api.common_api.InstalledAppWrapper
-import me.biocomp.hubitat_ci.capabilities.GeneratedCapability
-import me.biocomp.hubitat_ci.util.NullableOptional
-import me.biocomp.hubitat_ci.util.TimeKeeper
-import me.biocomp.hubitat_ci.validation.Flags
-
-import groovy.time.*
-
+import me.biocomp.hubitat_ci.util.integration.IntegrationAppSpecification
+import me.biocomp.hubitat_ci.util.integration.TimeKeeper
 
 import spock.lang.Specification
 
 /**
 * Behavior tests for autoShadesInstance.groovy
 */
-class BehaviorTests extends Specification {
-    private HubitatAppSandbox sandbox = new HubitatAppSandbox(new File('autoShadesInstance.groovy'))
-
-    def log = Mock(Log)
-
-    def installedApp = Mock(InstalledAppWrapper)
-
-    def appState = [lastAutoShade: null, lastManualClose: null]
-
-    def appExecutor = Spy(IntegrationAppExecutor) {
-        _*getLog() >> log
-        _*getApp() >> installedApp
-        _*getState() >> appState
-    }
-
+class BehaviorTests extends IntegrationAppSpecification {
     def shadeFixture = WindowShadeFixtureFactory.create('ws')
     def lightSensorFixture = LightSensorFixtureFactory.create('ls')
 
-    def appScript = sandbox.run(api: appExecutor,
-        userSettingValues: [wrappedShade: shadeFixture, lightSensor: lightSensorFixture, illuminanceThreshold: 400, delayAfterManualClose: 120, delayAfterAutoClose: 15, delayAfterAutoOpen: 3, enableDebugLogging: true])
-
+    @Override
     def setup() {
-        TimeKeeper.removeAllListeners()
-        appExecutor.setSubscribingScript(appScript)
+        super.initializeEnvironment(appScriptFilename: "autoShadesInstance.groovy",
+                                    userSettingValues: [wrappedShade: shadeFixture, lightSensor: lightSensorFixture, illuminanceThreshold: 400, delayAfterManualClose: 120, delayAfterAutoClose: 15, delayAfterAutoOpen: 3, enableDebugLogging: true])
         appScript.installed()
-    }
-
-    def cleanup() {
-        TimeKeeper.removeAllListeners()
     }
 
     void "Shade should auto-open when it gets dark"() {
@@ -62,8 +30,8 @@ class BehaviorTests extends Specification {
         lightSensorFixture.setIlluminance(200)
 
         then: "The shade should auto-open"
-        shadeFixture.state.windowShade == "open"
-        shadeFixture.state.position == 100
+        shadeFixture.currentValue('windowShade') == "open"
+        shadeFixture.currentValue('position') == 100
     }
 
     void "Shade should not auto-close too soon after auto-opening"() {
@@ -81,8 +49,8 @@ class BehaviorTests extends Specification {
         lightSensorFixture.setIlluminance(600)
 
         then: "The shade should not auto-close yet"
-        shadeFixture.state.windowShade == "open"
-        shadeFixture.state.position == 100
+        shadeFixture.currentValue('windowShade') == "open"
+        shadeFixture.currentValue('position') == 100
     }
 
     void "Shade can auto-close after an auto-open, if enough time has passed"() {
@@ -100,8 +68,8 @@ class BehaviorTests extends Specification {
         lightSensorFixture.setIlluminance(600)
 
         then: "The shade should auto-close"
-        shadeFixture.state.windowShade == "closed"
-        shadeFixture.state.position == 0
+        shadeFixture.currentValue('windowShade') == "closed"
+        shadeFixture.currentValue('position') == 0
     }
 
     void "Shade should auto-close when it gets bright"() {
@@ -113,8 +81,8 @@ class BehaviorTests extends Specification {
         lightSensorFixture.setIlluminance(600)
 
         then: "The shade should auto-close"
-        shadeFixture.state.windowShade == "closed"
-        shadeFixture.state.position == 0
+        shadeFixture.currentValue('windowShade') == "closed"
+        shadeFixture.currentValue('position') == 0
     }
 
     void "Shade should not auto-open too soon after auto-closing"() {
@@ -132,8 +100,8 @@ class BehaviorTests extends Specification {
         lightSensorFixture.setIlluminance(200)
 
         then: "The shade should not auto-open yet"
-        shadeFixture.state.windowShade == "closed"
-        shadeFixture.state.position == 0
+        shadeFixture.currentValue('windowShade') == "closed"
+        shadeFixture.currentValue('position') == 0
     }
 
     void "Shade can auto-open after an auto-close, if enough time has passed"() {
@@ -151,8 +119,8 @@ class BehaviorTests extends Specification {
         lightSensorFixture.setIlluminance(200)
 
         then: "The shade should auto-open"
-        shadeFixture.state.windowShade == "open"
-        shadeFixture.state.position == 100
+        shadeFixture.currentValue('windowShade') == "open"
+        shadeFixture.currentValue('position') == 100
     }
 
     void "Shade should not auto-open too soon after a manual close"() {
@@ -169,8 +137,8 @@ class BehaviorTests extends Specification {
         lightSensorFixture.setIlluminance(600)
 
         then: "The shade should not auto-close"
-        shadeFixture.state.windowShade == "open"
-        shadeFixture.state.position == 100
+        shadeFixture.currentValue('windowShade') == "open"
+        shadeFixture.currentValue('position') == 100
     }
 
     void "Shade can auto-close after a manual open, if enough time has passed"() {
@@ -187,8 +155,8 @@ class BehaviorTests extends Specification {
         lightSensorFixture.setIlluminance(600)
 
         then: "The shade should auto-close"
-        shadeFixture.state.windowShade == "closed"
-        shadeFixture.state.position == 0
+        shadeFixture.currentValue('windowShade') == "closed"
+        shadeFixture.currentValue('position') == 0
     }
 
     void "Shade should not auto-close too soon after a manual open"() {
@@ -205,8 +173,8 @@ class BehaviorTests extends Specification {
         lightSensorFixture.setIlluminance(200)
 
         then: "The shade should not auto-open"
-        shadeFixture.state.windowShade == "closed"
-        shadeFixture.state.position == 0
+        shadeFixture.currentValue('windowShade') == "closed"
+        shadeFixture.currentValue('position') == 0
     }
 
     void "Shade can auto-open after a manual close, if enough time has passed"() {
@@ -223,8 +191,8 @@ class BehaviorTests extends Specification {
         lightSensorFixture.setIlluminance(200)
 
         then: "The shade should auto-open"
-        shadeFixture.state.windowShade == "open"
-        shadeFixture.state.position == 100
+        shadeFixture.currentValue('windowShade') == "open"
+        shadeFixture.currentValue('position') == 100
     }
 
 }
