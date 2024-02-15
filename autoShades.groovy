@@ -1,5 +1,5 @@
 /**
- *  Auto Shades v1.03
+ *  Auto Shades v1.1
  *
  *  Copyright 2019 Joel Wetzel
  *
@@ -52,9 +52,9 @@ def initialize() {
 }
 
 
-def installCheck() {         
+def installCheck() {
 	state.appInstalled = app.getInstallationState()
-	
+
 	if (state.appInstalled != 'COMPLETE') {
 		section{paragraph "Please hit 'Done' to install '${app.label}' parent app "}
   	}
@@ -75,14 +75,14 @@ def display(){
 	section() {
 		paragraph getFormat("line")
 		paragraph "<div style='color:#1A77C9;text-align:center'>Auto Shades - @joelwetzel<br><a href='https://github.com/joelwetzel/' target='_blank'>Click here for more Hubitat apps/drivers on my GitHub!</a></div>"
-	}       
+	}
 }
 
 
 def mainPage() {
     dynamicPage(name: "mainPage") {
     	installCheck()
-		
+
 		if (state.appInstalled == 'COMPLETE') {
 			section(getFormat("title", "${app.label}")) {
 				paragraph "Auto Shades can automatically open and close smart blinds and shades, depending on the values of light sensors."
@@ -95,7 +95,3 @@ def mainPage() {
 		}
 	}
 }
-
-
-
-
